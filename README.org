@@ -1,0 +1,25 @@
+* revita
+
+revita is a daily task management tool for emacs org mode.
+
+Sample setting with use-package and straight is below.
+
+#+begin_src elisp
+(use-package revita
+  :straight
+  ( :host github
+    :repo "yamanogotoshi/revita"
+    :type git
+    :files ("*"))
+  :hook ((kill-emacs-hook . revita-save-project-file-alist)
+         (org-after-todo-state-change-hook . revita-org-add-logbook-if-missing))
+  :bind (("C-c t" . (lambda ()
+                       (interactive)
+                       (find-file "~/org/tasks.org")))
+         ("C-c o" . revita-open-project-file)
+         ("C-c p" . revita-insert-project-link))
+  :custom
+  (org-columns-default-format "%5TODO(state) %10TAGS(proj) %25ITEM(task) %Effort(estim){:} %CLOCKSUM(clock) %START_TIME(start) %END_TIME(end)"))
+#+end_src
+
+
