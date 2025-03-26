@@ -1,6 +1,6 @@
 * revita
 
-revita is a daily task management tool for emacs org mode.
+revita is helper functons for daily task management in emacs org mode.
 
 Sample setting with use-package and straight is below.
 
