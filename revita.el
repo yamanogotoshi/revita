@@ -41,8 +41,13 @@ For example, \"~/work/2025\". Each project will be placed under this directory."
   :group 'revita-project)
 
 (defun revita-save-project-file-alist ()
-  "Save revita-project-file-alist using custom-set-variables."
-  (customize-save-variable 'revita-project-file-alist revita-project-file-alist))
+  "Save revita-project-file-alist using custom-set-variables,
+removing text properties from keys before saving."
+  (let ((cleaned-alist (mapcar (lambda (pair)
+                                 (cons (substring-no-properties (car pair))
+                                       (cdr pair)))
+                               revita-project-file-alist)))
+    (customize-save-variable 'revita-project-file-alist cleaned-alist)))
 
 (defun revita-insert-project-link ()
   "Insert a link to the file corresponding to the current task's tag."
@@ -73,7 +78,7 @@ For example, \"~/work/2025\". Each project will be placed under this directory."
           (setq revita-project-file-alist
                 (cons (cons proj-tag file-path)
                       (assoc-delete-all proj-tag revita-project-file-alist)))
-          (customize-save-variable 'revita-project-file-alist revita-project-file-alist)
+          (revita-save-project-file-alist) ; Use the dedicated save function
           (org-end-of-subtree)
           (insert "\n")
           (org-insert-link nil file-path proj-tag))
@@ -89,6 +94,7 @@ For example, \"~/work/2025\". Each project will be placed under this directory."
     (setq revita-project-file-alist
           (cons (cons tag new-path)
                 (assoc-delete-all tag revita-project-file-alist)))
+    (revita-save-project-file-alist) ; Add save call
     (message "Updated path for tag '%s' to '%s'" tag new-path)))
 
 (defun revita-open-project-file ()
@@ -134,7 +140,7 @@ If the file does not exist, create the project file."
             (setq revita-project-file-alist
                   (cons (cons proj-tag file-path)
                         (assoc-delete-all proj-tag revita-project-file-alist)))
-            (customize-save-variable 'revita-project-file-alist revita-project-file-alist))
+            (revita-save-project-file-alist)) ; Use the dedicated save function
           ;; If it doesn't exist, create a new one
           (unless (file-exists-p file-path)
             (when (y-or-n-p (format "File %s does not exist. Create it? " file-path))
