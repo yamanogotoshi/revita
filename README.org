@@ -24,3 +24,106 @@ Sample setting with leaf and el-get is below.
   #+end_src
 
 
+* 提案するtask managementの流れ
+
+revitaは、ここで提案するタスク管理手法で利用することを想定しています。
+
+ここで提案するタスク管理手法は、TaskChuteを参考に、筆者独自の解釈で実践するためのものです。
+ただし、このワークフローは筆者独自の解釈に基づくものであり、TaskChuteの公式な方法とは異なる点にご注意ください。
+
+タスク管理の流れ
+1. `~/org/tasks.org` というファイルを作成します。
+   - このファイルに1日のタスクを記述します。
+2. 毎朝 `org-capture` を使って、その日のタスクを書き出します。
+   - `org-capture` のテンプレート例は後述します。
+   - `org-capture` 関連の設定例は以下の通りです。
+#+begin_src emacs-lisp
+(leaf org-capture
+    :config
+    (setq org-directory "~/org")
+    (setq org-daily-tasks-file (format "%s/tasks.org" org-directory))
+    (global-set-key (kbd "\C-cc") 'org-capture)
+    :custom
+    (org-capture-templates .
+    '(("d" "daily TODO" entry (file org-daily-tasks-file)
+       "%[~/.emacs.d/assets/org-templates/routine.org]" :prepend t))))
+#+end_src
+   - `:prepend t` を指定することで、キャプチャした内容がファイルの先頭に挿入されます。
+   - 上記設定例では `routine.org` を `~/.emacs.d/assets/org-templates` に配置していますが、任意のパスに変更してください。
+3. 各見出しにタグを付け (`C-c C-c`)、`M-x revita-open-project-file` を実行すると、そのタグに対応するプロジェクトファイルを開くことができます。
+4. `~/org/tasks.org` で `M-x org-columns` (または `C-c C-x C-c`) を実行すると、タスク一覧が見やすく表示されます。
+
+* org-captureのテンプレート  
+#+begin_src 
+* %<%Y/%m/%d (%a)> [/]
+:PROPERTIES:
+:COOKIE_DATA: todo recursive
+:END:
+#+BEGIN: columnview :hlines 3
+#+END:
+** memo
+*** タスク振り返り
+*** 明日のタスク案
+
+** [1] 5:00-8:00
+*** TODO タスク書き出し
+:LOGBOOK:
+:END:
+
+*** TODO 朝食
+:LOGBOOK:
+:END:
+
+*** TODO ジョギング
+:PROPERTIES:
+:Effort:   35
+:END:
+:LOGBOOK:
+:END:
+
+*** TODO シャワー
+:PROPERTIES:
+:Effort:   20
+:END:
+:LOGBOOK:
+:END:
+
+
+** セクション2 8:00-12:00
+
+
+** セクション3 12:00-16:00
+%(if (= (string-to-number (format-time-string "%d")) 1)
+     "*** TODO TJKの抽選に申し込む(月始め)")
+
+%(if (or (member (calendar-day-of-week (calendar-current-date)) '(0 6))
+         (calendar-check-holidays (calendar-current-date)))
+     "*** TODO 作り置きを作る")
+
+** セクション4 16:00-20:00
+
+** セクション5 20:00-24:00
+
+
+*** TODO フロスをする
+:PROPERTIES:
+:Effort:   3
+:END:
+
+*** TODO leetcode                                                  :leetcode:
+:PROPERTIES:
+:Effort:   60
+:END:
+:LOGBOOK:
+:END:
+
+[[file:~/work/2025/leetcode/leetcode.org::*work][work]]
+*** TODO 本を読む
+:PROPERTIES:
+:Effort:   10
+:END:
+:LOGBOOK:
+:END:
+     
+#+end_src
+  
