@@ -32,11 +32,11 @@ revitaは、ここで提案するタスク管理手法で利用することを�
 ただし、このワークフローは筆者独自の解釈に基づくものであり、TaskChuteの公式な方法とは異なる点にご注意ください。
 
 タスク管理の流れ
-1. `~/org/tasks.org` というファイルを作成します。
-   - このファイルに1日のタスクを記述します。
-2. 毎朝 `org-capture` を使って、その日のタスクを書き出します。
-   - `org-capture` のテンプレート例は後述します。
-   - `org-capture` 関連の設定例は以下の通りです。
+** 1. `~/org/tasks.org` というファイルを作成します
+- このファイルに毎日のタスクを記述します。
+** 2. 毎朝 `org-capture` を使って、その日のタスクを書き出します
+- `org-capture` のテンプレートroutine.orgの例は後述します。
+- `org-capture` 関連の設定例は以下の通りです。
 #+begin_src emacs-lisp
 (leaf org-capture
     :config
@@ -48,12 +48,15 @@ revitaは、ここで提案するタスク管理手法で利用することを�
     '(("d" "daily TODO" entry (file org-daily-tasks-file)
        "%[~/.emacs.d/assets/org-templates/routine.org]" :prepend t))))
 #+end_src
-   - `:prepend t` を指定することで、キャプチャした内容がファイルの先頭に挿入されます。
-   - 上記設定例では `routine.org` を `~/.emacs.d/assets/org-templates` に配置していますが、任意のパスに変更してください。
-3. 各見出しにタグを付け (`C-c C-c`)、`M-x revita-open-project-file` を実行すると、そのタグに対応するプロジェクトファイルを開くことができます。
-4. `~/org/tasks.org` で `M-x org-columns` (または `C-c C-x C-c`) を実行すると、タスク一覧が見やすく表示されます。
+- `:prepend t` を指定することで、キャプチャした内容がファイルの先頭に挿入されます。
+- 上記設定例では `routine.org` を `~/.emacs.d/assets/org-templates` に配置していますが、必要に応じて任意のパスに変更してください。
+- routine.orgという名前で分かる通り､毎日行うタスクを書いておき､毎朝タスクを作成するときにします｡このファイルは日々アップデートしていきます｡また､ここに書いてあることを毎日やる必要はありません｡
+ 
+** 3. タグとファイルの対応付け
+各見出しにタグを付け (`C-c C-c`)、`M-x revita-open-project-file` を実行すると、そのタグに対応するプロジェクトファイルを開くことができます。
+** 4. `~/org/tasks.org` で `M-x org-columns` (または `C-c C-x C-c`) を実行すると、タスク一覧が見やすく表示されます。
 
-* org-captureのテンプレート  
+* org-captureのテンプレートroutine.org例
 #+begin_src 
 * %<%Y/%m/%d (%a)> [/]
 :PROPERTIES:
@@ -127,3 +130,4 @@ revitaは、ここで提案するタスク管理手法で利用することを�
      
 #+end_src
   
+`** [1] 5:00-8:00`のように時間間隔を設定しておき､その下に`*** TODO ジョギング`のようにタスクを設定します｡
