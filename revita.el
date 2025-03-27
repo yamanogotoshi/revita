@@ -16,6 +16,7 @@
 
 ;;; Code:
 
+(require 'org)
 
 (defgroup revita-project nil
   "Settings for revita project management."
