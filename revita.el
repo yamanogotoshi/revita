@@ -44,18 +44,18 @@ For example, \"~/work/2025\". Each project will be placed under this directory."
   (customize-save-variable 'revita-project-file-alist revita-project-file-alist))
 
 (defun revita-insert-project-link ()
-  "現在のタスクのタグに対応するファイルへのリンクを挿入する"
+  "Insert a link to the file corresponding to the current task's tag."
   (interactive)
   (let* ((tags (org-get-tags))
          (proj-tag (if (= (length tags) 1)
                        (car tags)
-                     (completing-read "プロジェクトタグを選択: " tags nil t)))
+                     (completing-read "Select project tag: " tags nil t)))
 	 (default-path (expand-file-name
                         (format "%s.org" proj-tag)
                         (expand-file-name proj-tag revita-project-directory)))
          (file-path (or (cdr (assoc proj-tag revita-project-file-alist))
-                        (read-file-name 
-                         (format "プロジェクト %s のファイルパスを入力 (デフォルト: %s): " 
+                        (read-file-name
+                         (format "Enter file path for project %s (default: %s): "
                                  proj-tag default-path)
                          (file-name-directory default-path)
                          nil
@@ -64,7 +64,7 @@ For example, \"~/work/2025\". Each project will be placed under this directory."
     (if proj-tag
         (progn
           (unless (file-exists-p file-path)
-            (when (y-or-n-p (format "ファイル %s が存在しません。作成しますか？ " file-path))
+            (when (y-or-n-p (format "File %s does not exist. Create it? " file-path))
               (make-directory (file-name-directory file-path) t)
               (with-temp-buffer
 		(insert revita-default-org-content)
@@ -76,55 +76,55 @@ For example, \"~/work/2025\". Each project will be placed under this directory."
           (org-end-of-subtree)
           (insert "\n")
           (org-insert-link nil file-path proj-tag))
-      (message "タグが見つかりません"))))
+      (message "Tag not found"))))
 
 (defun revita-change-project-file-path (tag)
-  "指定されたタグのプロジェクトファイルパスを変更する"
-  (interactive "sタグ名を入力: ")
+  "Change the project file path for the specified tag."
+  (interactive "sEnter tag name: ")
   (let* ((current-path (cdr (assoc tag revita-project-file-alist)))
-         (new-path (read-file-name 
-                    (format "新しいファイルパスを入力 (現在: %s): " current-path)
+         (new-path (read-file-name
+                    (format "Enter new file path (current: %s): " current-path)
                     (file-name-directory current-path))))
     (setq revita-project-file-alist
           (cons (cons tag new-path)
                 (assoc-delete-all tag revita-project-file-alist)))
-    (message "タグ '%s' のパスを '%s' に更新しました" tag new-path)))
+    (message "Updated path for tag '%s' to '%s'" tag new-path)))
 
 (defun revita-open-project-file ()
-  "現在のタスクのタグ、または revita-project-file-alist のタグを選んで
-対応するプロジェクトファイルを開く。
-ファイルが登録されていない場合はパスを入力し、
-存在しない場合はプロジェクトファイルを作成する。"
+  "Select a tag from the current task or revita-project-file-alist
+and open the corresponding project file.
+If the file is not registered, prompt for the path.
+If the file does not exist, create the project file."
   (interactive)
-  ;; 現在の heading からタグを取得
+  ;; Get tags from the current heading
   (let* ((tags (org-get-tags))
          (proj-tag
           (cond
-           ;; タグが1つだけならそのまま使う
+           ;; If there is only one tag, use it directly
            ((= (length tags) 1)
             (car tags))
-           ;; タグが複数あればユーザーに選んでもらう
+           ;; If there are multiple tags, let the user choose
            ((> (length tags) 1)
-            (completing-read "プロジェクトタグを選択: " tags nil t))
-           ;; タグが無い/Org heading外の場合は revita-project-file-alist から選ぶ
+            (completing-read "Select project tag: " tags nil t))
+           ;; If no tags / outside Org heading, choose from revita-project-file-alist
            (t
             (completing-read
-             "プロジェクトタグを選択 (登録済みタグ): "
+             "Select project tag (registered tags): "
              (mapcar #'car revita-project-file-alist)
              nil t))))
-         ;; デフォルトパスを組み立てる
+         ;; Construct the default path
          (default-path (expand-file-name
                         (format "%s.org" proj-tag)
                         (expand-file-name proj-tag revita-project-directory)))
-         ;; alist からファイルパスを取得
+         ;; Get the file path from the alist
          (file-path (cdr (assoc proj-tag revita-project-file-alist))))
     (if proj-tag
         (progn
-          ;; 未登録タグならユーザーに入力を促す
+          ;; If the tag is not registered, prompt the user for input
           (unless file-path
             (setq file-path
                   (read-file-name
-                   (format "プロジェクト %s のファイルパスを入力 (デフォルト: %s): "
+                   (format "Enter file path for project %s (default: %s): "
                            proj-tag default-path)
                    (file-name-directory default-path)
                    nil
@@ -134,20 +134,20 @@ For example, \"~/work/2025\". Each project will be placed under this directory."
                   (cons (cons proj-tag file-path)
                         (assoc-delete-all proj-tag revita-project-file-alist)))
             (customize-save-variable 'revita-project-file-alist revita-project-file-alist))
-          ;; 実在しない場合は新規作成
+          ;; If it doesn't exist, create a new one
           (unless (file-exists-p file-path)
-            (when (y-or-n-p (format "ファイル %s が存在しません。作成しますか？ " file-path))
+            (when (y-or-n-p (format "File %s does not exist. Create it? " file-path))
               (make-directory (file-name-directory file-path) t)
               (with-temp-buffer
                 (insert revita-default-org-content)
                 (write-file file-path))))
-          ;; 最後にファイルを開く
+          ;; Finally, open the file
           (find-file file-path))
-      (message "タグが見つかりません"))))
+      (message "Tag not found"))))
 
 (defun revita-org-extract-clock-times ()
-  "現在のエントリーの LOGBOOK の CLOCK 行から開始・終了時刻を取得し、プロパティに設定する。
-   既存の :START_TIME: は変更せず、:END_TIME: は上書きする。"
+  "Extract start/end times from CLOCK lines in the current entry's LOGBOOK and set them as properties.
+   Do not change existing :START_TIME:, overwrite :END_TIME:."
   (save-excursion
     (let (start-time end-time)
       (when (re-search-forward org-clock-string nil t)
@@ -155,33 +155,33 @@ For example, \"~/work/2025\". Each project will be placed under this directory."
           (when (string-match "\\[\\([0-9]+:[0-9]+\\)\\].*--\\[\\([0-9]+:[0-9]+\\)\\]" clock-line)
             (setq start-time (match-string 1 clock-line))
             (setq end-time (match-string 2 clock-line)))))
-      ;; :START_TIME: は既に存在する場合は変更しない
+      ;; Do not change :START_TIME: if it already exists
       (unless (org-entry-get (point) "START_TIME")
         (when start-time (org-entry-put (point) "START_TIME" start-time)))
-      ;; :END_TIME: は常に上書き
+      ;; Always overwrite :END_TIME:
       (when end-time (org-entry-put (point) "END_TIME" end-time)))))
 
 (defun revita-org-update-start-time ()
-  "CLOCK IN 時に :START_TIME: を更新。ただし、既に :START_TIME: がある場合は変更しない。"
+  "Update :START_TIME: on CLOCK IN. However, do not change if :START_TIME: already exists."
   (save-excursion
     (org-back-to-heading t)
-    (unless (org-entry-get (point) "START_TIME") ;; 既にあれば更新しない
+    (unless (org-entry-get (point) "START_TIME") ;; Do not update if it already exists
       (let ((start-time (format-time-string "%H:%M")))
         (org-entry-put (point) "START_TIME" start-time)))))
 
 (defun revita-org-update-end-time ()
-  "CLOCK OUT 時に :END_TIME: を更新し、必要なら :START_TIME: も補完。
-   ただし、:START_TIME: が既に存在する場合は変更しない。"
+  "Update :END_TIME: on CLOCK OUT, and supplement :START_TIME: if necessary.
+   However, do not change if :START_TIME: already exists."
   (save-excursion
     (org-back-to-heading t)
     (let ((end-time (format-time-string "%H:%M")))
-      (org-entry-put (point) "END_TIME" end-time) ;; 常に上書き
+      (org-entry-put (point) "END_TIME" end-time) ;; Always overwrite
       (unless (org-entry-get (point) "START_TIME")
         (revita-org-extract-clock-times)))))
 
 (defun revita-org-add-logbook-if-missing ()
-  "現在のエントリーに LOGBOOK ドロワーがない場合、追加する。
-   すでに PROPERTIES ドロワーがある場合、その直後に追加する。"
+  "Add a LOGBOOK drawer to the current entry if it is missing.
+   If a PROPERTIES drawer already exists, add it immediately after."
   (save-excursion
     (org-back-to-heading t)
     (unless (re-search-forward "^[ \t]*:LOGBOOK:" (save-excursion (org-end-of-subtree t)) t)
@@ -190,8 +190,8 @@ For example, \"~/work/2025\". Each project will be placed under this directory."
                              (re-search-forward "^[ \t]*:END:" nil t)
                              (point)))))
         (if logbook-pos
-            (goto-char logbook-pos) ;; PROPERTIES の最終行に移動
-          (end-of-line)) ;; なければ通常通り末尾に追加
+            (goto-char logbook-pos) ;; Move to the last line of PROPERTIES
+          (end-of-line)) ;; If not found, add to the end as usual
         (insert "\n:LOGBOOK:\n:END:\n")))))
 
 (provide 'revita)
