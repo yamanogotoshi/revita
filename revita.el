@@ -96,8 +96,8 @@ and open the corresponding project file.
 If the file is not registered, prompt for the path.
 If the file does not exist, create the project file."
   (interactive)
-  ;; Get tags from the current heading
-  (let* ((tags (org-get-tags))
+  ;; Get tags from the current heading only if in org-mode buffer
+  (let* ((tags (when (derived-mode-p 'org-mode) (org-get-tags)))
          (proj-tag
           (cond
            ;; If there is only one tag, use it directly
